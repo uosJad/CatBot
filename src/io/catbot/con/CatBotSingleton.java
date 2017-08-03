@@ -3,6 +3,7 @@ package src.io.catbot.con;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
+import src.io.catbot.lis.MessageListener;
 import src.io.catbot.lis.ReadyListener;
 
 /**
@@ -42,6 +43,7 @@ public class CatBotSingleton {
             JDA jda = new JDABuilder(AccountType.BOT)
                     .setToken(token)
                     .addEventListener(new ReadyListener())
+                    .addEventListener(new MessageListener())
                     .buildBlocking();
             return jda;
         }

@@ -10,7 +10,7 @@ public class Driver {
 
     public static void main(String[] args){
 
-        JSonHandler jsh = new JSonHandler("catbotcredentials.json");
+        JSonHandler jsh = new JSonHandler("catbotcredentials.json"); // or to your credentials
         CatBotSingleton.getInstance().setToken((String)jsh.get("Token"));
         CatBotSingleton.getInstance().setJDA();
     }

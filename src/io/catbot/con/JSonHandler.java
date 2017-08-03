@@ -12,14 +12,14 @@ import java.util.Map;
  */
 public class JSonHandler {
     //first string is id, second is data
-    Map<String, Comparable> credentials;
+    Map<String, String> contents;
 
 
     public JSonHandler(String s){
 
         BufferedReader br = generateReader(s);
         Gson gson = new Gson();
-        credentials = gson.fromJson(br, Map.class);
+        contents = gson.fromJson(br, Map.class);
     }
 
     private BufferedReader generateReader(String s){
@@ -34,13 +34,20 @@ public class JSonHandler {
         return null;
     }
 
-    public Comparable get(String s){
+    public String get(String s){
 
-        if (credentials.containsKey(s)){
-            return credentials.get(s);
+        if (contents.containsKey(s)){
+            return contents.get(s);
         }
 
         return null;
+    }
+
+    public boolean containsField(String s){
+        if (contents.containsKey(s)){
+            return true;
+        }
+        return false;
     }
 
 
