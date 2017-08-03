@@ -21,8 +21,7 @@ public class RetortHandler {
         String msg = event.getMessage().getContent();
 
         if (jsh.containsField(msg)){
-            //TODO post retort
-            System.out.println(jsh.get(msg));
+            event.getTextChannel().sendMessage(jsh.getValueFromField(msg)).queue();
         }
     }
 

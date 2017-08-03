@@ -17,7 +17,7 @@ public class MessageListener extends ListenerAdapter {
 
     public MessageListener(){
         JSonHandler jsh = new JSonHandler("config.json");
-        prefix = (String)jsh.get("CommandPrefix");
+        prefix = (String)jsh.getValueFromField("CommandPrefix");
     }
 
 

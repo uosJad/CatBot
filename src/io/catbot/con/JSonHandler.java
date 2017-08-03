@@ -34,7 +34,7 @@ public class JSonHandler {
         return null;
     }
 
-    public String get(String s){
+    public String getValueFromField(String s){
 
         if (contents.containsKey(s)){
             return contents.get(s);
