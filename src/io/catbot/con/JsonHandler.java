@@ -5,21 +5,21 @@ import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jason on 8/2/17.
  */
-public class JSonHandler {
+public class JsonHandler {
     //first string is id, second is data
-    Map<String, String> contents;
+    protected Map<String, String> contents;
+    protected Gson gson;
 
-
-    public JSonHandler(String s){
+    public JsonHandler(String s){
 
         BufferedReader br = generateReader(s);
-        Gson gson = new Gson();
-        contents = gson.fromJson(br, Map.class);
+        gson = new Gson();
+        contents = gson.fromJson(br, HashMap.class);
     }
 
     private BufferedReader generateReader(String s){

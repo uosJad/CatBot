@@ -1,33 +1,20 @@
-package src.io.catbot.lis;
+package src.io.catbot.listeners;
 
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import src.io.catbot.con.JSonHandler;
-import src.io.catbot.lis.retort.RetortHandler;
 
 /**
  * Created by jason on 8/2/17.
  */
 public class MessageListener extends ListenerAdapter {
-    protected String prefix;
 
-
-    public MessageListener(){
-        JSonHandler jsh = new JSonHandler("config.json");
-        prefix = (String)jsh.getValueFromField("CommandPrefix");
-    }
-
-
-
-
+    public MessageListener(){}
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-
-
 
         JDA jda = event.getJDA();                       //JDA, the core of the api.
         long responseNumber = event.getResponseNumber();//The amount of discord events that JDA has received since the last reconnect.
@@ -36,16 +23,6 @@ public class MessageListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         String msg = message.getContent();
         boolean bot = author.isBot();
-
-        RetortHandler retortHandler = new RetortHandler(event);
-        retortHandler.relay();
-
-
-        if (isCommand(event.getMessage().getContent())){
-            System.out.println("is command");
-        }
-
-
 
         if (event.isFromType(ChannelType.TEXT)){
 
@@ -79,13 +56,4 @@ public class MessageListener extends ListenerAdapter {
             }
 
     }
-
-    protected boolean isCommand(String s){
-        if (Character.toString(s.charAt(0)).equals(prefix)){
-            return true;
-        }
-        return false;
-    }
-
-
 }

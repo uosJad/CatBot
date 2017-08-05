@@ -3,19 +3,21 @@ package src.io.catbot.con;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import src.io.catbot.lis.MessageListener;
-import src.io.catbot.lis.ReadyListener;
+import src.io.catbot.commands.DefaultCommand;
+import src.io.catbot.listeners.ReadyListener;
+import src.io.catbot.listeners.MessageListener;
+import src.io.catbot.listeners.RetortListener;
 
 /**
  * Created by jason on 8/2/17.
  */
-public class CatBotSingleton {
-    private static CatBotSingleton instance;
+public class CatBot {
+    private static CatBot instance;
 
     private JDA catBot;
     private String token;
 
-    private CatBotSingleton() {}
+    private CatBot() {}
 
     public JDA getCatBot() {
         return catBot;
@@ -25,9 +27,9 @@ public class CatBotSingleton {
         token = s;
     }
 
-    public static CatBotSingleton getInstance() {
+    public static CatBot getInstance() {
         if (instance == null){
-            instance = new CatBotSingleton();
+            instance = new CatBot();
         }
         return instance;
     }
@@ -40,19 +42,27 @@ public class CatBotSingleton {
 
         try{
             // Note: It is important to register your ReadyListener before building
-            JDA jda = new JDABuilder(AccountType.BOT)
+            JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT)
                     .setToken(token)
                     .addEventListener(new ReadyListener())
-                    .addEventListener(new MessageListener())
-                    .buildBlocking();
-            return jda;
+                    .addEventListener(new MessageListener());
+
+            jdaBuilder = addCommands(jdaBuilder);
+
+            return jdaBuilder.buildBlocking();
         }
         catch (Exception e){
             e.printStackTrace();
         }
 
         return null;
+    }
 
+    private JDABuilder addCommands(JDABuilder jdaBuilder){
+        jdaBuilder
+                .addEventListener(new RetortListener())
+                .addEventListener(new DefaultCommand());
+        return jdaBuilder;
     }
 
 }
