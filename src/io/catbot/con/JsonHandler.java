@@ -50,6 +50,10 @@ public class JsonHandler {
         return false;
     }
 
+    public Set<String> getKeys(){
+        return contents.keySet();
+    }
+
 
 
 

@@ -10,8 +10,10 @@ public class DefaultCommand extends CommandListener {
 
     public DefaultCommand(){
         super();
-        setAlias("ping");
-        setDescription("Used to test if CatBot is responding properly");
+        //setArgOptional(false);
+        setArgs(new String[]{});
+        addAlias("ping");
+        setDescription("Responds with pong");
     }
 
     public void doCommand(MessageReceivedEvent event, String[] args) {

@@ -4,6 +4,7 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import src.io.catbot.commands.DefaultCommand;
+import src.io.catbot.commands.HelpCommand;
 import src.io.catbot.listeners.ReadyListener;
 import src.io.catbot.listeners.MessageListener;
 import src.io.catbot.listeners.RetortListener;
@@ -61,7 +62,8 @@ public class CatBot {
     private JDABuilder addCommands(JDABuilder jdaBuilder){
         jdaBuilder
                 .addEventListener(new RetortListener())
-                .addEventListener(new DefaultCommand());
+                .addEventListener(new DefaultCommand())
+                .addEventListener(new HelpCommand());
         return jdaBuilder;
     }
 
