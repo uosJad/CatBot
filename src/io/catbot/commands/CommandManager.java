@@ -83,9 +83,12 @@ public class CommandManager {
         for(int i = 0; i < args.length; i++){
             argString = argString + "<" + args[i] + ">";
         }
+
+        /*
         if (com.isArgOptional()){
             argString = argString + "(optional)";
         }
+        */
 
         if (argString.equals(" ") || argString.equals(" (optional)")){
             argString = "";
