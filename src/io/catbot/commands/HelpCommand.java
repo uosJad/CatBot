@@ -15,6 +15,7 @@ public class HelpCommand extends CommandListener{
 
     public HelpCommand(){
         super();
+        setArgOptional(true);
         setArgs(new String[]{"command"});
         addAlias("help");
         addAlias("h");
@@ -50,7 +51,7 @@ public class HelpCommand extends CommandListener{
         helpString = "```css\nTODO formatting\n\n";
 
         while(it.hasNext()){
-            helpString = helpString +"  "+ CommandManager.getInstance().getCommandInfo(it.next());
+            helpString = helpString +"  "+ CommandManager.getInstance().getShortCommandInfo(it.next());
         }
 
         helpString = helpString + "```";

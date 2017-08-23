@@ -10,9 +10,9 @@ public class AboutCommand extends CommandListener {
 
     public AboutCommand(){
         super();
-        setArgs(new String[]{});
+        //setArgs(new String[]{});
         addAlias("about");
-        setDescription("Info about me");
+        setDescription("Displays info about CatBot");
     }
 
 
@@ -28,7 +28,7 @@ public class AboutCommand extends CommandListener {
                 "**Github:**\nhttps://github.com/uosJad/CatBot\n\n" +
                 "**JDA:**\nhttps://github.com/DV8FromTheWorld/JDA\n\n" +
                 "**Special Thanks to:**\n" +
-                "TODO";
+                "TODO :L";
 
         return str;
     }

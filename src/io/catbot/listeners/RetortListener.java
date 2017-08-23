@@ -26,6 +26,7 @@ public class RetortListener extends ListenerAdapter {
     public void onMessageReceived(MessageReceivedEvent event){
         //TODO make more efficient
 
+        //if self
         if (event.getAuthor().getAvatarId().equals("bc3d22581e06d67c618670e28da48d01")){
             return;
         }
@@ -46,7 +47,7 @@ public class RetortListener extends ListenerAdapter {
 
     public void doRetort(MessageReceivedEvent event, String key){
         //System.out.print("testset");
-        event.getTextChannel().sendMessage(retorts.getValueFromField(key)).queue();
+        event.getTextChannel().sendMessage(retorts.getValueFromKey(key)).queue();
     }
 
 }

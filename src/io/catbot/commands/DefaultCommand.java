@@ -11,7 +11,7 @@ public class DefaultCommand extends CommandListener {
     public DefaultCommand(){
         super();
         //setArgOptional(false);
-        setArgs(new String[]{});
+        //setArgs(new String[]{});
         addAlias("ping");
         setDescription("Responds with pong");
     }

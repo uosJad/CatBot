@@ -3,9 +3,7 @@ package src.io.catbot.commands;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import src.io.catbot.listeners.CommandListener;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by jason on 8/4/17.
@@ -52,10 +50,17 @@ public class CommandManager {
     }
 
 
+    public String getShortCommandInfo(CommandListener com){
+        String info = getAliasString(com) + " ";
+        info = info + "[" + com.getDescription() + "]\n";
+
+        return info;
+    }
+
     public String getCommandInfo(CommandListener com){
-        String info = getAliasString(com);
-        info = info + getArgsString(com) + " | ";
-        info = info + com.getDescription() + "\n";
+
+        String info = getShortCommandInfo(com);
+        info = info + getArgsString(com);
 
         return info;
 
@@ -77,11 +82,27 @@ public class CommandManager {
     }
 
     protected String getArgsString(CommandListener com){
-        String[] args = com.getArgs();
-        String argString = " ";
+        Map<String, String[]> args = com.getArgs();
+        String argString = "\n";
+        Iterator<String> it = args.keySet().iterator();
 
-        for(int i = 0; i < args.length; i++){
-            argString = argString + "<" + args[i] + ">";
+
+        while (it.hasNext()){
+
+            String mod = it.next();
+            String[] para = args.get(mod);
+
+            argString = argString + "\t" + com.getAliases().iterator().next() + " ";
+
+            if (mod != "default"){
+                argString = argString + mod + " ";
+            }
+
+            for(int i = 0; i < para.length; i++){
+                argString = argString + "[" + para[i] + "] ";
+            }
+            argString = argString + "\n";
+
         }
 
         /*
