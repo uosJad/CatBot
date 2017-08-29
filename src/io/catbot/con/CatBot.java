@@ -4,10 +4,7 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Guild;
-import src.io.catbot.commands.AboutCommand;
-import src.io.catbot.commands.DefaultCommand;
-import src.io.catbot.commands.HelpCommand;
-import src.io.catbot.commands.RetortManagerCommand;
+import src.io.catbot.commands.*;
 import src.io.catbot.db.DBConnector;
 import src.io.catbot.listeners.JoinedGuildListener;
 import src.io.catbot.listeners.ReadyListener;
@@ -47,13 +44,53 @@ public class CatBot {
 
     public void setJDA(){
         catBot = generateJDA();
+        checkGuilds();
+    }
+
+    //TODO
+    private void checkGuilds(){
         List<Guild> guildList = catBot.getGuilds();
         Iterator<Guild> it = guildList.iterator();
+
         while(it.hasNext()){
-            System.out.println(it.next());
+            Guild guild = it.next();
+            checkGuildInDB(guild);
+        }
+    }
+
+    public void checkGuildInDB(Guild guild){
+        String sqlString = "select ServerID from Servers where ServerID='" + guild.getId() + "';";
+        ResultSet rs = sendSQLStatement(sqlString);
+        boolean hasServerID = false;
+
+        try {
+            while (rs.next()) {
+                if (rs.getString("ServerID").equals(guild.getId())) {
+                    hasServerID = true;
+                    break;
+                }
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
         }
 
+        // if server does not exist in database
+        if (!hasServerID){
+            insertNewServer(guild);
+        }
+        else {
+            System.out.println(guild.getId() + " in database");
+        }
     }
+
+    private void insertNewServer(Guild guild){
+        String updateString = "insert into Servers (ServerID, IsCommandOn)" +
+                "values (" + guild.getId() + ", true);";
+        System.out.println(guild.getId() + " doesn't exist in database. Adding...");
+        sendSQLUpdate(updateString);
+    }
+
 
     public void setDBConnection(){
         connection = new DBConnector();
@@ -100,6 +137,7 @@ public class CatBot {
                 .addEventListener(new DefaultCommand())
                 .addEventListener(new AboutCommand())
                 .addEventListener(new HelpCommand())
+                .addEventListener(new AdminHelpCommand())
                 .addEventListener(new RetortManagerCommand());
         return jdaBuilder;
     }

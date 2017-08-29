@@ -9,22 +9,22 @@ import java.util.Set;
 /**
  * Created by jason on 8/4/17.
  */
-public class HelpCommand extends CommandListener{
+public class AdminHelpCommand extends CommandListener{
 
     private String helpString;
 
-    public HelpCommand(){
+    public AdminHelpCommand(){
         super();
         setArgOptional(true);
         setArgs(new String[]{"command"});
-        addAlias("help");
-        addAlias("h");
-        setDescription("Display commands");
+        addAlias("admin");
+        addAdminCommand("default");
+        setDescription("Display admin commands");
     }
 
     public void doCommand(MessageReceivedEvent event, String[] args) {
         if (helpString == null){
-            generateHelpString(false);
+            generateHelpString(true);
         }
 
         //TODO send as pm
@@ -36,10 +36,10 @@ public class HelpCommand extends CommandListener{
             CommandListener temp = CommandManager.getInstance().getCommandListener(args[1]);
             CommandListener temp2 = CommandManager.getInstance().getCommandListener("+"+args[1]);
             if (temp != null){
-                CommandManager.getInstance().sendCommandInfo(event, temp, false);
+                CommandManager.getInstance().sendCommandInfo(event, temp, true);
             }
             else if(temp2 != null){
-                CommandManager.getInstance().sendCommandInfo(event, temp2, false);
+                CommandManager.getInstance().sendCommandInfo(event, temp2, true);
             }
         }
     }

@@ -45,8 +45,8 @@ public class CommandManager {
         return null;
     }
 
-    public void sendCommandInfo(MessageReceivedEvent event, CommandListener com){
-        event.getTextChannel().sendMessage("```css\n" + getCommandInfo(com) + "```").queue();
+    public void sendCommandInfo(MessageReceivedEvent event, CommandListener com, boolean showAdmin){
+        event.getTextChannel().sendMessage("```css\n" + getCommandInfo(com, showAdmin) + "```").queue();
     }
 
 
@@ -57,10 +57,10 @@ public class CommandManager {
         return info;
     }
 
-    public String getCommandInfo(CommandListener com){
+    public String getCommandInfo(CommandListener com, boolean showAdmin){
 
         String info = getShortCommandInfo(com);
-        info = info + getArgsString(com);
+        info = info + getArgsString(com, showAdmin);
 
         return info;
 
@@ -81,7 +81,7 @@ public class CommandManager {
         return aliasString;
     }
 
-    protected String getArgsString(CommandListener com){
+    protected String getArgsString(CommandListener com, boolean showAdmin){
         Map<String, String[]> args = com.getArgs();
         String argString = "\n";
         Iterator<String> it = args.keySet().iterator();
@@ -90,18 +90,21 @@ public class CommandManager {
         while (it.hasNext()){
 
             String mod = it.next();
-            String[] para = args.get(mod);
 
-            argString = argString + "\t" + com.getAliases().iterator().next() + " ";
+            if (showAdmin || !com.getAdminCommands().contains(mod)) {
+                String[] para = args.get(mod);
 
-            if (mod != "default"){
-                argString = argString + mod + " ";
+                argString = argString + "\t" + com.getAliases().iterator().next() + " ";
+
+                if (mod != "default") {
+                    argString = argString + mod + " ";
+                }
+
+                for (int i = 0; i < para.length; i++) {
+                    argString = argString + "[" + para[i] + "] ";
+                }
+                argString = argString + "\n";
             }
-
-            for(int i = 0; i < para.length; i++){
-                argString = argString + "[" + para[i] + "] ";
-            }
-            argString = argString + "\n";
 
         }
 

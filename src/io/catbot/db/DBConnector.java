@@ -14,7 +14,7 @@ public class DBConnector {
     public DBConnector(){}
 
     public void setConnString(String dbHost, String dbName, String dbUser, String dbPass) {
-        connString = "jdbc:mysql://" + dbHost + "/" + dbName;
+        connString = "jdbc:mysql://" + dbHost + "/" + dbName + "?useSSL=false";
         user = dbUser;
         pass = dbPass;
     }
@@ -24,6 +24,7 @@ public class DBConnector {
         try {
             //System.out.println("Trying to connect with " + this.connString);
             conn = DriverManager.getConnection(this.connString, user, pass);
+
         }
         catch (Exception e){
             e.printStackTrace();
@@ -36,12 +37,14 @@ public class DBConnector {
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
 
+
+            System.out.println("Sending update: [" + varSQL + "]");
+
             Connection conn = getConnection();
             Statement statement = conn.createStatement();
             statement.executeUpdate(varSQL);
             statement.close();
             conn.close();
-            System.out.println("Updated");
         }
         catch (Exception e){
             e.printStackTrace();
@@ -53,12 +56,17 @@ public class DBConnector {
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
 
+            System.out.println("Sending statement: [" + varSQL + "]");
+
             Connection conn =  getConnection();
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery(varSQL);
 
+            //print in console
+            /*
             displayColumnNames(rs.getMetaData());
             displayColumnValues(rs, rs.getMetaData().getColumnCount());
+            */
 
             return rs;
 
@@ -74,6 +82,16 @@ public class DBConnector {
             conn.close();
         }*/
         return null;
+    }
+
+    public ResultSet sendSQLFileStatement(String path){
+        SQLReader sqlr = new SQLReader(path);
+        return sendStatement(sqlr.getFileString());
+    }
+
+    public void sendSQLFileUpdate(String path){
+        SQLReader sqlr = new SQLReader(path);
+        sendUpdate(sqlr.getFileString());
     }
 
     private void displayColumnNames(ResultSetMetaData rsMeta){

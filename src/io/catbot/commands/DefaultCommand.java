@@ -13,6 +13,7 @@ public class DefaultCommand extends CommandListener {
         //setArgOptional(false);
         //setArgs(new String[]{});
         addAlias("ping");
+        addAdminCommand("default");
         setDescription("Responds with pong");
     }
 
