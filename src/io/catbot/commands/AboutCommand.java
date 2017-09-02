@@ -3,6 +3,8 @@ package src.io.catbot.commands;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import src.io.catbot.listeners.CommandListener;
 
+import java.util.List;
+
 /**
  * Created by jason on 8/7/17.
  */
@@ -15,8 +17,8 @@ public class AboutCommand extends CommandListener {
         setDescription("Displays info about CatBot");
     }
 
-
-    public void doCommand(MessageReceivedEvent event, String[] args) {
+    @Override
+    public void doCommand(MessageReceivedEvent event, List<String> args) {
         event.getTextChannel().sendMessage(getInfoString()).queue();
     }
 

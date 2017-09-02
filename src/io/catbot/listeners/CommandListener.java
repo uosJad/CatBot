@@ -7,10 +7,9 @@ import net.dv8tion.jda.core.utils.PermissionUtil;
 import src.io.catbot.commands.CommandManager;
 import src.io.catbot.con.JsonHandler;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by jason on 8/4/17.
@@ -26,7 +25,7 @@ public abstract class CommandListener extends ListenerAdapter {
     private boolean isArgOptional;
     protected final String prefix;
 
-    public abstract void doCommand(MessageReceivedEvent event, String[] args);
+    public abstract void doCommand(MessageReceivedEvent event, List<String> args);
 
     public CommandListener(){
         CommandManager.getInstance().addCommand(this);
@@ -40,18 +39,28 @@ public abstract class CommandListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        String[] argsEvent = getStringsFromEvent(event);
+        List<String> argsEvent = getStringsFromEvent(event);
 
-        //TODO check permission
+        //TODO prevent in line sql
 
         //if is an arguement
-        if (isAnAlias(argsEvent[0])){
+        if (isAnAlias(argsEvent.get(0))){
 
+            System.out.println(argsEvent.get(0));
+
+            //if has permissions to do command
             if (checkValidPermissions(event, argsEvent)) {
-                //if help
-                if (argsEvent[0].equals("+help")) {
+
+                System.out.println(argsEvent.get(0));
+
+                //if help, do it regardless of modifiers
+                if (argsEvent.get(0).equals("+help")) {
                     doCommand(event, argsEvent);
-                } else if (argsEvent[0].equals("+admin") && checkValidPermissions(event, argsEvent)) {
+                }
+
+                //TODO dont display for non admins if has an arg
+                //if admin, do admin if permissions
+                else if (argsEvent.get(0).equals("+admin") && checkValidPermissions(event, argsEvent)) {
                     doCommand(event, argsEvent);
                 }
 
@@ -59,14 +68,14 @@ public abstract class CommandListener extends ListenerAdapter {
                 else if (isArgOptional) {
 
                     //if > 2 args and is a command
-                    if (hasArgs(argsEvent) && checkValidArgs(argsEvent)) {
+                    if (checkValidArgs(argsEvent)) {
                         doCommand(event, argsEvent);
                     } else if (!hasArgs(argsEvent)) {
                         doCommand(event, argsEvent);
                     } else {
                         sendInfo(event);
                     }
-                } else if (!isArgOptional && hasArgs(argsEvent) && checkValidArgs(argsEvent) && checkValidPermissions(event, argsEvent)) {
+                } else if (!isArgOptional && checkValidArgs(argsEvent) && checkValidPermissions(event, argsEvent)) {
                     doCommand(event, argsEvent);
                 } else {
                     sendInfo(event);
@@ -81,16 +90,16 @@ public abstract class CommandListener extends ListenerAdapter {
     }
 
     //if it is an adminCommand, check if user is an admin
-    private boolean checkValidPermissions(MessageReceivedEvent event, String[] argsEvent){
+    private boolean checkValidPermissions(MessageReceivedEvent event, List<String> argsEvent){
 
         //if default is an admin command
-        if (argsEvent.length == 1) {
+        if (argsEvent.size() == 1 || argsEvent.get(0).equals("+admin")) {
             if (!adminCommands.contains("default")){
                 return true;
             }
         }
         //if modifier is an admin command
-        else if (!adminCommands.contains(argsEvent[1])){
+        else if (!adminCommands.contains(argsEvent.get(1))){
             return true;
         }
 
@@ -106,16 +115,21 @@ public abstract class CommandListener extends ListenerAdapter {
 
     }
 
-    //TODO multiple args numbers per modifier
     //checks to see if there is the correct number of args for the modifier
-    //assumed that args[1] is already known to be a valid modifier
-    private boolean checkValidArgs(String[] argsEvent){
-        if (!args.containsKey(argsEvent[1])){
+    private boolean checkValidArgs(List<String> argsEvent){
+
+        //if does not have multiple args
+        if (!hasArgs(argsEvent)){
             return false;
         }
 
-        String commandKey = argsEvent[1];
-        if (!(args.get(commandKey).length == argsEvent.length - 2)){
+        //if is not a valid modifier
+        if (!args.containsKey(argsEvent.get(1))){
+            return false;
+        }
+
+        String commandKey = argsEvent.get(1);
+        if (!(args.get(commandKey).length == argsEvent.size() - 2)){
             return false;
         }
 
@@ -124,15 +138,29 @@ public abstract class CommandListener extends ListenerAdapter {
 
 
     //checks if there is 2 or more args
-    private boolean hasArgs(String[] strings){
-        if (strings.length < 2){
+    private boolean hasArgs(List<String> strings){
+        if (strings.size() < 2){
             return false;
         }
         return true;
     }
 
-    public String[] getStringsFromEvent(MessageReceivedEvent event){
-        return event.getMessage().getContent().toLowerCase().split(" ");
+
+    //TODO make more efficient
+    public List<String> getStringsFromEvent(MessageReceivedEvent event){
+        //only spaces
+        //event.getMessage().getContent().toLowerCase().split(" ");
+
+        List<String> list = new ArrayList<String>();
+        Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(event.getMessage().getContent().toLowerCase());
+
+        while (m.find()) {
+            //System.out.println(m.group(1).replace("\"", ""));
+            list.add(m.group(1).replace("\"", ""));
+        }
+
+        return list;
+
     }
 
     public Set<String> getAdminCommands() {

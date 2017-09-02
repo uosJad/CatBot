@@ -8,6 +8,7 @@ import src.io.catbot.db.DBConnector;
 import src.io.catbot.listeners.CommandListener;
 
 import java.sql.ResultSet;
+import java.util.List;
 
 /**
  * Created by jason on 8/18/17.
@@ -22,24 +23,29 @@ public class RetortManagerCommand extends CommandListener{
         setArgs("list", new String[]{});
         setArgs("toggle", new String[]{});
         setArgs("add", new String[]{"trigger", "retort"});
+        setArgs("remove", new String[]{"trigger"});
         addAdminCommand("add");
+        addAdminCommand("toggle");
+        addAdminCommand("remove");
+
 
         addAlias("retort");
         addAlias("r");
         setDescription("Set a custom retort");
     }
 
-    public void doCommand(MessageReceivedEvent event, String[] argsEvent) {
-        if (argsEvent.length == 1){
+    @Override
+    public void doCommand(MessageReceivedEvent event, List<String> argsEvent) {
+        if (argsEvent.size() == 1){
             listRetorts(event);
         }
-        else if (argsEvent[1].equals("add")){
+        else if (argsEvent.get(1).equals("add")){
             addRetorts(event, argsEvent);
         }
-        else if(argsEvent[1].equals("list")){
+        else if(argsEvent.get(1).equals("list")){
             listRetorts(event);
         }
-        else if(argsEvent[1].equals("toggle")){
+        else if(argsEvent.get(1).equals("toggle")){
             toggleRetorts(event);
         }
     }
@@ -55,17 +61,17 @@ public class RetortManagerCommand extends CommandListener{
 
     }
 
-    private void addRetorts(MessageReceivedEvent event, String[] argsEvent){
+    private void addRetorts(MessageReceivedEvent event, List<String> argsEvent){
         int count = checkRetortCount(event);
         if (count <= MAX_RETORTS_PER_SERVER){
             String insertString = "insert into Retorts (ServerID, TriggerString, Message) "+
                     "values ('" + event.getGuild().getId() + "', '" +
-                    argsEvent[2] + "', '" +
-                    argsEvent[3] + "');";
+                    argsEvent.get(2) + "', '" +
+                    argsEvent.get(3) + "');";
             try{
                 CatBot.getInstance().sendSQLUpdate(insertString);
                 event.getTextChannel().sendMessage(
-                        argsEvent[2] + " with response " + argsEvent[3] + " added").queue();
+                        "\"" + argsEvent.get(2) + "\" with response \"" + argsEvent.get(3) + "\" added").queue();
 
             }
             catch (Exception e){

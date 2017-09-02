@@ -3,6 +3,8 @@ package src.io.catbot.commands;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import src.io.catbot.listeners.CommandListener;
 
+import java.util.List;
+
 /**
  * Created by jason on 8/4/17.
  */
@@ -17,7 +19,8 @@ public class DefaultCommand extends CommandListener {
         setDescription("Responds with pong");
     }
 
-    public void doCommand(MessageReceivedEvent event, String[] args) {
+    @Override
+    public void doCommand(MessageReceivedEvent event, List<String> args) {
         event.getTextChannel().sendMessage("pong").queue();
     }
 }

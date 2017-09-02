@@ -4,6 +4,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import src.io.catbot.listeners.CommandListener;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -22,19 +23,20 @@ public class HelpCommand extends CommandListener{
         setDescription("Display commands");
     }
 
-    public void doCommand(MessageReceivedEvent event, String[] args) {
+    @Override
+    public void doCommand(MessageReceivedEvent event, List<String> args) {
         if (helpString == null){
             generateHelpString(false);
         }
 
         //TODO send as pm
-        if (args.length == 1){
+        if (args.size() == 1){
             event.getTextChannel().sendMessage(helpString).queue();
         }
-        else if(args.length == 2){
+        else if(args.size() == 2){
 
-            CommandListener temp = CommandManager.getInstance().getCommandListener(args[1]);
-            CommandListener temp2 = CommandManager.getInstance().getCommandListener("+"+args[1]);
+            CommandListener temp = CommandManager.getInstance().getCommandListener(args.get(1));
+            CommandListener temp2 = CommandManager.getInstance().getCommandListener("+"+args.get(1));
             if (temp != null){
                 CommandManager.getInstance().sendCommandInfo(event, temp, false);
             }
