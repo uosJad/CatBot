@@ -58,7 +58,6 @@ public abstract class CommandListener extends ListenerAdapter {
                     doCommand(event, argsEvent);
                 }
 
-                //TODO dont display for non admins if has an arg
                 //if admin, do admin if permissions
                 else if (argsEvent.get(0).equals("+admin") && checkValidPermissions(event, argsEvent)) {
                     doCommand(event, argsEvent);
