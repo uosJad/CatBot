@@ -100,7 +100,7 @@ public class RetortManagerCommand extends CommandListener{
 
         }
         catch (Exception e){
-
+            e.printStackTrace();
         }
 
     }
@@ -146,6 +146,8 @@ public class RetortManagerCommand extends CommandListener{
         }
     }
 
+
+    //TODO MOVE MAX TO DB
     private void addRetorts(MessageReceivedEvent event, List<String> argsEvent){
         int count = checkRetortCount(event);
         if (count <= MAX_RETORTS_PER_SERVER){
@@ -162,13 +164,44 @@ public class RetortManagerCommand extends CommandListener{
             catch (Exception e){
                 e.printStackTrace();
             }
-
         }
     }
 
 
     private void toggleRetorts(MessageReceivedEvent event){
-        event.getTextChannel().sendMessage("toggle").queue();
+        String sqlString = "select IsCommandOn " +
+                "from Servers "+
+                "where ServerID='" + event.getGuild().getId() + "';";
+
+        try{
+            ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+            if (rs.next()) {
+                String updateString;
+
+                if (rs.getBoolean("IsCommandOn")){
+                    updateString= "update Servers " +
+                            "set IsCommandOn=0 "+
+                            "where ServerID='" + event.getGuild().getId() + "';";
+                    CatBot.getInstance().sendSQLUpdate(updateString);
+                    event.getTextChannel().sendMessage("Retorts for " + event.getGuild().getName() + " turned off").queue();
+                }
+                else {
+                    updateString= "update Servers " +
+                            "set IsCommandOn=1 "+
+                            "where ServerID='" + event.getGuild().getId() + "';";
+                    CatBot.getInstance().sendSQLUpdate(updateString);
+                    event.getTextChannel().sendMessage("Retorts for " + event.getGuild().getName() + " turned on").queue();
+                }
+            }
+            else {
+                throw new Exception("Server: " + event.getGuild().getId() + " doesn't exist in db");
+            }
+
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private int checkRetortCount(MessageReceivedEvent event){
