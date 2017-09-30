@@ -117,40 +117,34 @@ public class RetortManagerCommand extends CommandListener{
     }
 
     private void removeRetorts(MessageReceivedEvent event, List<String> argsEvent){
-        int count = checkRetortCount(event);
-        if (count <= MAX_RETORTS_PER_SERVER){
-            String insertString = "delete from Retorts "+
-                    "where  ServerID='" + event.getGuild().getId() + "' and " +
-                    "TriggerString='"+ argsEvent.get(2) + "';";
-            String sqlString =
-                    "select TriggerString, ServerID " +
-                            "from Retorts " +
-                            "where TriggerString ='" + argsEvent.get(2) + "';";
-            try{
-                ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
-                if (rs.next()){
-                    CatBot.getInstance().sendSQLUpdate(insertString);
-                    event.getTextChannel().sendMessage(
-                            "\"" + argsEvent.get(2) + "\" retort removed").queue();
-                }
-                else {
-                    event.getTextChannel().sendMessage(
-                            "\"" + argsEvent.get(2) + "\" doesn't exist").queue();
-                }
-
+        String insertString = "delete from Retorts "+
+                "where  ServerID='" + event.getGuild().getId() + "' and " +
+                "TriggerString='"+ argsEvent.get(2) + "';";
+        String sqlString =
+                "select TriggerString, ServerID " +
+                        "from Retorts " +
+                        "where TriggerString ='" + argsEvent.get(2) + "';";
+        try{
+            ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+            if (rs.next()){
+                CatBot.getInstance().sendSQLUpdate(insertString);
+                event.getTextChannel().sendMessage(
+                        "\"" + argsEvent.get(2) + "\" retort removed").queue();
             }
-            catch (Exception e){
-                e.printStackTrace();
+            else {
+                event.getTextChannel().sendMessage(
+                        "\"" + argsEvent.get(2) + "\" doesn't exist").queue();
             }
 
         }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
-
-    //TODO MOVE MAX TO DB
     private void addRetorts(MessageReceivedEvent event, List<String> argsEvent){
-        int count = checkRetortCount(event);
-        if (count <= MAX_RETORTS_PER_SERVER){
+        int count = getRetortCount(event);
+        if (count < getMaxRetorts(event)){
             String insertString = "insert into Retorts (ServerID, TriggerString, Message) "+
                     "values ('" + event.getGuild().getId() + "', '" +
                     argsEvent.get(2).toLowerCase() + "', '" +
@@ -165,8 +159,10 @@ public class RetortManagerCommand extends CommandListener{
                 e.printStackTrace();
             }
         }
+        else {
+            event.getTextChannel().sendMessage("Max number of retorts reached! Please remove some before adding more.").queue();
+        }
     }
-
 
     private void toggleRetorts(MessageReceivedEvent event){
         String sqlString = "select IsCommandOn " +
@@ -204,7 +200,26 @@ public class RetortManagerCommand extends CommandListener{
         }
     }
 
-    private int checkRetortCount(MessageReceivedEvent event){
+    private int getMaxRetorts(MessageReceivedEvent event){
+        String sqlString =
+                "select MaxRetorts " +
+                        "from Servers " +
+                        "where ServerID='" + event.getGuild().getId() + "';";
+        try{
+            ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+            rs.next();
+            return rs.getInt("MaxRetorts");
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return -1;
+
+    }
+
+    private int getRetortCount(MessageReceivedEvent event){
         String id = event.getGuild().getId();
         String sqlString =
                 "select count(TriggerString) " +
@@ -229,7 +244,9 @@ public class RetortManagerCommand extends CommandListener{
 
     private void printList(ResultSet rs, MessageReceivedEvent event){
         try {
-            String s = "```\nResponse List for " + event.getGuild().getName() + ":\n\n";
+            String s = "```\nResponse List for " + event.getGuild().getName() +
+                    " (" + getRetortCount(event) + "/" + getMaxRetorts(event) + ")" +
+                    ":\n\n";
             while (rs.next()){
                 s = s + rs.getString("TriggerString") + ": " + rs.getString("Message");
                 if (!rs.getBoolean("IsExact")){

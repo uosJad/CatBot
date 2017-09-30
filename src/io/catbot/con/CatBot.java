@@ -133,12 +133,12 @@ public class CatBot {
 
     private JDABuilder addCommands(JDABuilder jdaBuilder){
         jdaBuilder
-                .addEventListener(new RetortListener())
                 .addEventListener(new DefaultCommand())
                 .addEventListener(new AboutCommand())
                 .addEventListener(new HelpCommand())
                 .addEventListener(new AdminHelpCommand())
-                .addEventListener(new RetortManagerCommand());
+                .addEventListener(new RetortManagerCommand())
+                .addEventListener(new RetortListener());
         return jdaBuilder;
     }
 

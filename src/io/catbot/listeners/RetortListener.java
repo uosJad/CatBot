@@ -2,8 +2,10 @@ package src.io.catbot.listeners;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import src.io.catbot.con.CatBot;
 import src.io.catbot.con.JsonHandler;
 
+import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -12,11 +14,7 @@ import java.util.Set;
  */
 public class RetortListener extends ListenerAdapter {
 
-    private JsonHandler retorts;
-
-    public RetortListener(){
-        retorts = new JsonHandler("data/retorts.json");
-    }
+    public RetortListener(){}
 
     /**
      * Checks if message contains a retort trigger and if it does, send retort for each trigger
@@ -32,22 +30,48 @@ public class RetortListener extends ListenerAdapter {
         }
 
         String msg = event.getMessage().getContent().toLowerCase();
+        ResultSet rs = getRetortSet(event);
+        doRetort(event, msg, rs);
 
-        Set<String> keys = retorts.getKeys();
-        Iterator<String> it = keys.iterator();
+    }
 
-        while(it.hasNext()){
-            String temp = it.next();
-            if (msg.contains(temp)){
-                doRetort(event, temp);
+    public void doRetort(MessageReceivedEvent event, String msg, ResultSet rs){
+
+        try {
+            //loops through and checks triggers
+            while (rs.next()){
+
+                //if exact and msg equals string
+                if (rs.getBoolean("IsExact")){
+                    if (msg.equals(rs.getString("TriggerString"))){
+                        event.getTextChannel().sendMessage(rs.getString("Message")).queue();
+                    }
+                }
+                else if (!rs.getBoolean("IsExact")){
+                    if (msg.contains(rs.getString("TriggerString"))){
+                        event.getTextChannel().sendMessage(rs.getString("Message")).queue();
+                    }
+                }
             }
+
+            rs.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
 
     }
 
-    public void doRetort(MessageReceivedEvent event, String key){
-        //System.out.print("testset");
-        event.getTextChannel().sendMessage(retorts.getValueFromKey(key)).queue();
+    public ResultSet getRetortSet(MessageReceivedEvent event){
+        String id = event.getGuild().getId();
+        String sqlString =
+                "select TriggerString, Message, IsExact " +
+                        "from Retorts " +
+                        "where ServerID ='" + id + "';";
+        return CatBot.getInstance().sendSQLStatement(sqlString);
     }
+
+
+
 
 }
