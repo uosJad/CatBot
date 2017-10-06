@@ -1,12 +1,10 @@
 package src.io.catbot.commands;
 
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.utils.PermissionUtil;
 import src.io.catbot.con.CatBot;
-import src.io.catbot.db.DBConnector;
 import src.io.catbot.listeners.CommandListener;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
@@ -61,30 +59,42 @@ public class RetortManagerCommand extends CommandListener{
 
     private void toggleExact(MessageReceivedEvent event, List<String> argsEvent){
 
-        String sqlString = "select IsExact " +
+        PreparedStatement sqlString = createStatement("select IsExact " +
                 "from Retorts "+
-                "where ServerID='" + event.getGuild().getId() + "' and " +
-                "TriggerString='"+ argsEvent.get(2) + "';";
+                "where ServerID=? and " +
+                "TriggerString=?;");
 
         try{
+            sqlString.setString(1, event.getGuild().getId());
+            sqlString.setString(2, argsEvent.get(2));
+
             ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+
             if (rs.next()) {
-                String updateString;
+                PreparedStatement updateString;
 
                 if (rs.getBoolean("IsExact")){
-                    updateString= "update Retorts " +
+                    updateString = createStatement("update Retorts " +
                             "set IsExact=0 "+
-                            "where ServerID='" + event.getGuild().getId() + "' and " +
-                            "TriggerString='"+ argsEvent.get(2) + "';";
+                            "where ServerID=? and " +
+                            "TriggerString=?;");
+
+                    updateString.setString(1, event.getGuild().getId());
+                    updateString.setString(2, argsEvent.get(2));
+
                     CatBot.getInstance().sendSQLUpdate(updateString);
                     event.getTextChannel().sendMessage(
                             "\"" + argsEvent.get(2) + "\" trigger will now execute anytime it is typed").queue();
                 }
                 else{
-                    updateString= "update Retorts " +
-                            "set IsExact = 1 "+
-                            "where ServerID='" + event.getGuild().getId() + "' and " +
-                            "TriggerString='"+ argsEvent.get(2) + "';";
+                    updateString = createStatement("update Retorts " +
+                            "set IsExact=1 "+
+                            "where ServerID=? and " +
+                            "TriggerString=?;");
+
+                    updateString.setString(1, event.getGuild().getId());
+                    updateString.setString(2, argsEvent.get(2));
+
                     CatBot.getInstance().sendSQLUpdate(updateString);
                     event.getTextChannel().sendMessage(
                             "\"" + argsEvent.get(2) + "\" trigger will now execute if it is typed exactly").queue();
@@ -107,24 +117,39 @@ public class RetortManagerCommand extends CommandListener{
 
     private void listRetorts(MessageReceivedEvent event){
         String id = event.getGuild().getId();
-        String sqlString =
+        PreparedStatement sqlString = createStatement(
                 "select TriggerString, Message, IsExact " +
                 "from Retorts " +
-                "where ServerID ='" + id + "';";
+                "where ServerID =?;");
+
+        try{
+            sqlString.setString(1, id);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+
         ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
         printList(rs, event);
 
     }
 
     private void removeRetorts(MessageReceivedEvent event, List<String> argsEvent){
-        String insertString = "delete from Retorts "+
-                "where  ServerID='" + event.getGuild().getId() + "' and " +
-                "TriggerString='"+ argsEvent.get(2) + "';";
-        String sqlString =
+        PreparedStatement insertString = createStatement("delete from Retorts "+
+                "where  ServerID=? and " +
+                "TriggerString=?;");
+
+
+
+        PreparedStatement sqlString = createStatement(
                 "select TriggerString, ServerID " +
                         "from Retorts " +
-                        "where TriggerString ='" + argsEvent.get(2) + "';";
+                        "where TriggerString =?;");
         try{
+            insertString.setString(1, event.getGuild().getId());
+            insertString.setString(2, argsEvent.get(2));
+            sqlString.setString(1, argsEvent.get(2));
+
             ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
             if (rs.next()){
                 CatBot.getInstance().sendSQLUpdate(insertString);
@@ -145,11 +170,13 @@ public class RetortManagerCommand extends CommandListener{
     private void addRetorts(MessageReceivedEvent event, List<String> argsEvent){
         int count = getRetortCount(event);
         if (count < getMaxRetorts(event)){
-            String insertString = "insert into Retorts (ServerID, TriggerString, Message) "+
-                    "values ('" + event.getGuild().getId() + "', '" +
-                    argsEvent.get(2).toLowerCase() + "', '" +
-                    argsEvent.get(3) + "');";
+            PreparedStatement insertString = createStatement("insert into Retorts (ServerID, TriggerString, Message) "+
+                    "values (?, ?, ?);");
             try{
+                insertString.setString(1, event.getGuild().getId());
+                insertString.setString(2, argsEvent.get(2).toLowerCase());
+                insertString.setString(3, argsEvent.get(3));
+
                 CatBot.getInstance().sendSQLUpdate(insertString);
                 event.getTextChannel().sendMessage(
                         "\"" + argsEvent.get(2) + "\" with response \"" + argsEvent.get(3) + "\" added").queue();
@@ -165,32 +192,40 @@ public class RetortManagerCommand extends CommandListener{
     }
 
     private void toggleRetorts(MessageReceivedEvent event){
-        String sqlString = "select IsCommandOn " +
+        PreparedStatement sqlString = createStatement("select IsCommandOn " +
                 "from Servers "+
-                "where ServerID='" + event.getGuild().getId() + "';";
+                "where ServerID=?;");
 
         try{
+            sqlString.setString(1, event.getGuild().getId());
+
             ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
             if (rs.next()) {
-                String updateString;
+                PreparedStatement updateString;
 
                 if (rs.getBoolean("IsCommandOn")){
-                    updateString= "update Servers " +
+                    updateString = createStatement("update Servers " +
                             "set IsCommandOn=0 "+
-                            "where ServerID='" + event.getGuild().getId() + "';";
+                            "where ServerID=?;");
+
+                    updateString.setString(1, event.getGuild().getId());
+
                     CatBot.getInstance().sendSQLUpdate(updateString);
                     event.getTextChannel().sendMessage("Retorts for " + event.getGuild().getName() + " turned off").queue();
                 }
                 else {
-                    updateString= "update Servers " +
+                    updateString = createStatement("update Servers " +
                             "set IsCommandOn=1 "+
-                            "where ServerID='" + event.getGuild().getId() + "';";
+                            "where ServerID=?;");
+
+                    updateString.setString(1, event.getGuild().getId());
+
                     CatBot.getInstance().sendSQLUpdate(updateString);
                     event.getTextChannel().sendMessage("Retorts for " + event.getGuild().getName() + " turned on").queue();
                 }
             }
             else {
-                throw new Exception("Server: " + event.getGuild().getId() + " doesn't exist in db");
+                throw new Exception("Server: " + event.getGuild().getId() + " doesn't exist in util");
             }
 
 
@@ -201,15 +236,16 @@ public class RetortManagerCommand extends CommandListener{
     }
 
     private int getMaxRetorts(MessageReceivedEvent event){
-        String sqlString =
-                "select MaxRetorts " +
+        PreparedStatement sqlString = createStatement("select MaxRetorts " +
                         "from Servers " +
-                        "where ServerID='" + event.getGuild().getId() + "';";
+                        "where ServerID=?;");
+
         try{
+            sqlString.setString(1, event.getGuild().getId());
+
             ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
             rs.next();
             return rs.getInt("MaxRetorts");
-
         }
         catch (Exception e){
             e.printStackTrace();
@@ -221,13 +257,15 @@ public class RetortManagerCommand extends CommandListener{
 
     private int getRetortCount(MessageReceivedEvent event){
         String id = event.getGuild().getId();
-        String sqlString =
+        PreparedStatement sqlString = createStatement(
                 "select count(TriggerString) " +
                         "from Retorts " +
-                        "where ServerID ='" + id + "';";
-        ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+                        "where ServerID=?;");
 
         try {
+            sqlString.setString(1, id);
+
+            ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
             rs.next();
 
             //System.out.println(rs.getString(1));

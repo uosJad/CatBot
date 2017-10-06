@@ -5,8 +5,10 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.utils.PermissionUtil;
 import src.io.catbot.commands.CommandManager;
+import src.io.catbot.con.CatBot;
 import src.io.catbot.con.JsonHandler;
 
+import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * Created by jason on 8/4/17.
  */
-public abstract class CommandListener extends ListenerAdapter {
+public abstract class CommandListener extends ListenerWrapper {
 
     private Set<String> aliases;
     private String desc;

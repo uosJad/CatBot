@@ -5,6 +5,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import src.io.catbot.con.CatBot;
 import src.io.catbot.con.JsonHandler;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.Set;
 /**
  * Created by jason on 8/4/17.
  */
-public class RetortListener extends ListenerAdapter {
+public class RetortListener extends ListenerWrapper {
 
     public RetortListener(){}
 
@@ -64,11 +65,17 @@ public class RetortListener extends ListenerAdapter {
 
     public ResultSet getRetortSet(MessageReceivedEvent event){
         String id = event.getGuild().getId();
-        String sqlString =
-                "select TriggerString, Message, IsExact " +
+        PreparedStatement ps = createStatement("select TriggerString, Message, IsExact " +
                         "from Retorts " +
-                        "where ServerID ='" + id + "';";
-        return CatBot.getInstance().sendSQLStatement(sqlString);
+                        "where ServerID=?;");
+        try{
+            ps.setString(1, id);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return sendSQLStatement(ps);
     }
 
 

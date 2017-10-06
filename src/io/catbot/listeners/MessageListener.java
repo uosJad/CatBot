@@ -9,7 +9,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 /**
  * Created by jason on 8/2/17.
  */
-public class MessageListener extends ListenerAdapter {
+public class MessageListener extends ListenerWrapper {
 
     public MessageListener(){}
 

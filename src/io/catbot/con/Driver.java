@@ -1,12 +1,5 @@
 package src.io.catbot.con;
 
-import net.dv8tion.jda.core.entities.Guild;
-import org.json.JSONObject;
-import src.io.catbot.db.DBConnector;
-import src.io.catbot.db.SQLReader;
-
-import java.util.Iterator;
-
 /**
  * Created by jason on 8/1/17.
  */

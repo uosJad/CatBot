@@ -5,12 +5,13 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import src.io.catbot.commands.*;
-import src.io.catbot.db.DBConnector;
+import src.io.catbot.util.DBConnector;
 import src.io.catbot.listeners.JoinedGuildListener;
 import src.io.catbot.listeners.ReadyListener;
 import src.io.catbot.listeners.MessageListener;
 import src.io.catbot.listeners.RetortListener;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.List;
@@ -58,12 +59,19 @@ public class CatBot {
         }
     }
 
+    public PreparedStatement createStatement(String s){
+        return connection.createStatement(s);
+    }
+
     public void checkGuildInDB(Guild guild){
-        String sqlString = "select ServerID from Servers where ServerID='" + guild.getId() + "';";
-        ResultSet rs = sendSQLStatement(sqlString);
+        PreparedStatement ps = createStatement("select ServerID from Servers where ServerID=?;");
+
         boolean hasServerID = false;
 
         try {
+            ps.setString(1, guild.getId());
+            ResultSet rs = sendSQLStatement(ps);
+
             while (rs.next()) {
                 if (rs.getString("ServerID").equals(guild.getId())) {
                     hasServerID = true;
@@ -85,16 +93,24 @@ public class CatBot {
     }
 
     private void insertNewServer(Guild guild){
-        String updateString = "insert into Servers (ServerID, IsCommandOn)" +
-                "values (" + guild.getId() + ", true);";
+        PreparedStatement psUpdate = createStatement("insert into Servers (ServerID, IsCommandOn)" +
+                "values (?, true);");
         System.out.println(guild.getId() + " doesn't exist in database. Adding...");
-        sendSQLUpdate(updateString);
+
+        try{
+            psUpdate.setString(1, guild.getId());
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        sendSQLUpdate(psUpdate);
     }
 
 
     public void setDBConnection(){
         connection = new DBConnector();
-        JsonHandler jsh = new JsonHandler("data/catbotdb.json"); // or to data/db.json
+        JsonHandler jsh = new JsonHandler("data/catbotdb.json"); // or to data/util.json
         connection.setConnString(jsh.getValueFromKey("Host"),
                 jsh.getValueFromKey("Database"),
                 jsh.getValueFromKey("User"),
@@ -102,11 +118,11 @@ public class CatBot {
         //connection.sendStatement("Select * from test;");
     }
 
-    public ResultSet sendSQLStatement(String s){
+    public ResultSet sendSQLStatement(PreparedStatement s){
         return connection.sendStatement(s);
     }
 
-    public void sendSQLUpdate(String s){
+    public void sendSQLUpdate(PreparedStatement s){
         connection.sendUpdate(s);
     }
 

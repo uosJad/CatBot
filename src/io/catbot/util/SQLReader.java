@@ -1,4 +1,4 @@
-package src.io.catbot.db;
+package src.io.catbot.util;
 
 
 import java.io.File;

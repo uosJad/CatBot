@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by jason on 8/20/17.
  */
-public class JoinedGuildListener extends ListenerAdapter{
+public class JoinedGuildListener extends ListenerWrapper{
 
     public JoinedGuildListener(){}
 

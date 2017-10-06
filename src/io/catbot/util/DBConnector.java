@@ -1,4 +1,4 @@
-package src.io.catbot.db;
+package src.io.catbot.util;
 
 import java.sql.*;
 
@@ -32,8 +32,7 @@ public class DBConnector {
         return conn;
     }
 
-
-    public void sendUpdate(String varSQL){
+    public PreparedStatement createStatement(String varSQL){
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
 
@@ -41,26 +40,56 @@ public class DBConnector {
             System.out.println("Sending update: [" + varSQL + "]");
 
             Connection conn = getConnection();
+            PreparedStatement ps = conn.prepareStatement(varSQL);
+            return ps;
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+    public void sendUpdate(PreparedStatement ps){
+        try{
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+
+
+            System.out.println("Sending update: [" + ps + "]");
+
+            ps.executeUpdate();
+            ps.getConnection().close();
+
+            /*
+            Connection conn = getConnection();
             Statement statement = conn.createStatement();
             statement.executeUpdate(varSQL);
             statement.close();
             conn.close();
+            */
         }
         catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public ResultSet sendStatement(String varSQL){
+    public ResultSet sendStatement(PreparedStatement ps){
 
         try{
             Class.forName("com.mysql.jdbc.Driver").newInstance();
 
-            System.out.println("Sending statement: [" + varSQL + "]");
+            System.out.println("Sending statement: [" + ps + "]");
 
-            Connection conn =  getConnection();
+            ResultSet rs = ps.executeQuery();
+            //ps.getConnection().close();
+
+            /*
+            Connection conn = getConnection();
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery(varSQL);
+            */
 
             //print in console
             /*
@@ -86,12 +115,12 @@ public class DBConnector {
 
     public ResultSet sendSQLFileStatement(String path){
         SQLReader sqlr = new SQLReader(path);
-        return sendStatement(sqlr.getFileString());
+        return sendStatement(createStatement(sqlr.getFileString()));
     }
 
     public void sendSQLFileUpdate(String path){
         SQLReader sqlr = new SQLReader(path);
-        sendUpdate(sqlr.getFileString());
+        sendUpdate(createStatement(sqlr.getFileString()));
     }
 
     private void displayColumnNames(ResultSetMetaData rsMeta){
