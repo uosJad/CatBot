@@ -48,7 +48,6 @@ public class CatBot {
         checkGuilds();
     }
 
-    //TODO
     private void checkGuilds(){
         List<Guild> guildList = catBot.getGuilds();
         Iterator<Guild> it = guildList.iterator();
@@ -154,7 +153,9 @@ public class CatBot {
                 .addEventListener(new HelpCommand())
                 .addEventListener(new AdminHelpCommand())
                 .addEventListener(new RetortManagerCommand())
-                .addEventListener(new RetortListener());
+                .addEventListener(new RetortListener())
+                .addEventListener(new PrefixCommand())
+                .addEventListener(new CatCommand());
         return jdaBuilder;
     }
 

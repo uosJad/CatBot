@@ -43,8 +43,6 @@ public abstract class CommandListener extends ListenerWrapper {
     public void onMessageReceived(MessageReceivedEvent event) {
         List<String> argsEvent = getStringsFromEvent(event);
 
-        //TODO prevent in line sql
-
         //if is an arguement
         if (isAnAlias(argsEvent.get(0))){
 
@@ -54,6 +52,8 @@ public abstract class CommandListener extends ListenerWrapper {
             if (checkValidPermissions(event, argsEvent)) {
 
                 System.out.println(argsEvent.get(0));
+
+                //TODO prefix based on servers
 
                 //if help, do it regardless of modifiers
                 if (argsEvent.get(0).equals("+help")) {
