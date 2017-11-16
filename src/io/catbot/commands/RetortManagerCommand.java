@@ -167,6 +167,8 @@ public class RetortManagerCommand extends CommandListener{
         }
     }
 
+    //TODO notify if exists
+
     private void addRetorts(MessageReceivedEvent event, List<String> argsEvent){
         int count = getRetortCount(event);
         if (count < getMaxRetorts(event)){

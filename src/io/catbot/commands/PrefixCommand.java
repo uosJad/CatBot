@@ -15,8 +15,7 @@ public class PrefixCommand extends CommandListener {
         setArgOptional(true);
         setArgs("default", new String[]{});
         setArgs("set", new String[]{"prefix"});
-        addAlias("help");
-        addAlias("h");
+        addAlias("prefix");
         setDescription("Display commands");
     }
 
