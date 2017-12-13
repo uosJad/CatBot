@@ -196,13 +196,13 @@ public class PetCommand extends CommandListener{
 
         PreparedStatement sqlString = createStatement(
                 "select Hunger " +
-                        "from Pets" +
+                        "from Pets " +
                         "where ServerID=? " +
                         "and PetName=?;");
 
         PreparedStatement updateString = createStatement(
                 "update Pets " +
-                        "set Hunger=?" +
+                        "set Hunger=? " +
                         "where ServerID=? " +
                         "and PetName=?;");
 
@@ -213,9 +213,11 @@ public class PetCommand extends CommandListener{
             ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
 
             //TODO externalize offset
+            rs.next();
             long hunger = rs.getLong("Hunger") - seconds/300;
 
-            if (hunger < 0){
+            //if hunger less than 0, set to 0
+            if (lastTime < 0 || hunger < 0){
 
                 updateString.setLong(1, 0);
                 updateString.setString(2, id);
