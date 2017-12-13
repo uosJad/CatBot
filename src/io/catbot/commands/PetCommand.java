@@ -11,9 +11,9 @@ import java.util.List;
 /**
  * Created by jason on 11/14/17.
  */
-public class CatCommand extends CommandListener{
+public class PetCommand extends CommandListener{
 
-    public CatCommand(){
+    public PetCommand(){
         super();
         setArgOptional(true);
         setArgs("new", new String[]{"name"});
@@ -23,6 +23,7 @@ public class CatCommand extends CommandListener{
         addAdminCommand("new");
         addAdminCommand("release");
         addAlias("cat");
+        addAlias("pet");
         setDescription("Pet commands for the server");
     }
 
@@ -62,13 +63,13 @@ public class CatCommand extends CommandListener{
             ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
 
             //TODO prefix
+
+            //if no pets
             if (!rs.next()) {
                 event.getTextChannel().sendMessage("None exist for " + event.getGuild().getName() +
                         ", do command +cat new").queue();
                 return;
             }
-
-
 
             String statusString = "```css\n";
 
@@ -76,13 +77,14 @@ public class CatCommand extends CommandListener{
 
                 String petName = rs.getString("PetName");
                 int happiness = rs.getInt("Happiness");
-                int hunger = calculateHunger(rs.getInt("TimeLastFeed"));
+                long hunger = calculateHunger(event, petName, rs.getLong("TimeLastFeed"), System.currentTimeMillis());
+
                 statusString = statusString + petName + ":" +
                         "\n\t- Happiness: " + happiness +
                         "\n\t- Fullness: " + hunger + "/100" +
                         "\n";
 
-            //TODO ms 360000 per 10 hunger ticks
+
             } while (rs.next());
 
             statusString = statusString + "```";
@@ -96,7 +98,11 @@ public class CatCommand extends CommandListener{
         }
     }
 
-
+    /**
+     * Creates a pet
+     * @param event
+     * @param argsEvent
+     */
     private void makeNewCat(MessageReceivedEvent event, List<String> argsEvent){
         int count = getPetCount(event);
         if (count < getMaxPets(event)){
@@ -171,9 +177,67 @@ public class CatCommand extends CommandListener{
 
     }
 
-    private int calculateHunger(int i){
 
-        return 0;
+
+    //TODO TEST THIS
+    /**
+     * returns and updates the hunger of the specified pet
+     * @param event
+     * @param petName
+     * @param lastTime
+     * @param currTime
+     * @return
+     */
+    private long calculateHunger(MessageReceivedEvent event, String petName, long lastTime, long currTime){
+
+        String id = event.getGuild().getId();
+
+        long seconds = (currTime - lastTime)/1000;
+
+        PreparedStatement sqlString = createStatement(
+                "select Hunger " +
+                        "from Pets" +
+                        "where ServerID=? " +
+                        "and PetName=?;");
+
+        PreparedStatement updateString = createStatement(
+                "update Pets " +
+                        "set Hunger=?" +
+                        "where ServerID=? " +
+                        "and PetName=?;");
+
+        try {
+            sqlString.setString(1, id);
+            sqlString.setString(2, petName);
+
+            ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+
+            //TODO externalize offset
+            long hunger = rs.getLong("Hunger") - seconds/300;
+
+            if (hunger < 0){
+
+                updateString.setLong(1, 0);
+                updateString.setString(2, id);
+                updateString.setString(3, petName);
+
+                CatBot.getInstance().sendSQLUpdate(updateString);
+                return 0;
+            }
+            else {
+                updateString.setLong(1, hunger);
+                updateString.setString(2, id);
+                updateString.setString(3, petName);
+
+                CatBot.getInstance().sendSQLUpdate(updateString);
+                return hunger;
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return -1;
     }
 
 }

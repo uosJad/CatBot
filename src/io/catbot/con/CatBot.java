@@ -155,7 +155,7 @@ public class CatBot {
                 .addEventListener(new RetortManagerCommand())
                 .addEventListener(new RetortListener())
                 .addEventListener(new PrefixCommand())
-                .addEventListener(new CatCommand());
+                .addEventListener(new PetCommand());
         return jdaBuilder;
     }
 
