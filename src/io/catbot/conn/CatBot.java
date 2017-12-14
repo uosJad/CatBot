@@ -1,4 +1,4 @@
-package src.io.catbot.con;
+package src.io.catbot.conn;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;

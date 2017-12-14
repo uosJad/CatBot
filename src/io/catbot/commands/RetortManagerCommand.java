@@ -1,7 +1,7 @@
 package src.io.catbot.commands;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import src.io.catbot.con.CatBot;
+import src.io.catbot.conn.CatBot;
 import src.io.catbot.listeners.CommandListener;
 
 import java.sql.PreparedStatement;
@@ -167,8 +167,7 @@ public class RetortManagerCommand extends CommandListener{
         }
     }
 
-    //TODO notify if exists
-
+    //TODO notify if a retort already exists
     private void addRetorts(MessageReceivedEvent event, List<String> argsEvent){
         int count = getRetortCount(event);
         if (count < getMaxRetorts(event)){

@@ -1,7 +1,7 @@
 package src.io.catbot.listeners;
 
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import src.io.catbot.con.CatBot;
+import src.io.catbot.conn.CatBot;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

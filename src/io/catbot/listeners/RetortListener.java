@@ -1,14 +1,9 @@
 package src.io.catbot.listeners;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import src.io.catbot.con.CatBot;
-import src.io.catbot.con.JsonHandler;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Created by jason on 8/4/17.

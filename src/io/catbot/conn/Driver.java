@@ -1,4 +1,4 @@
-package src.io.catbot.con;
+package src.io.catbot.conn;
 
 /**
  * Created by jason on 8/1/17.

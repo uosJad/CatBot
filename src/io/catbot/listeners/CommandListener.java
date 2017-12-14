@@ -2,13 +2,10 @@ package src.io.catbot.listeners;
 
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.utils.PermissionUtil;
 import src.io.catbot.commands.CommandManager;
-import src.io.catbot.con.CatBot;
-import src.io.catbot.con.JsonHandler;
+import src.io.catbot.conn.JsonHandler;
 
-import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +36,12 @@ public abstract class CommandListener extends ListenerWrapper {
         isArgOptional = true;
     }
 
+    /**
+     * Checks to see if the command is in the command list and if the
+     * arguments are of the correct format for each modifier
+     * If not, prints the command's info
+     * @param event
+     */
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         List<String> argsEvent = getStringsFromEvent(event);
@@ -90,7 +93,9 @@ public abstract class CommandListener extends ListenerWrapper {
                 CommandManager.getInstance().getCommandInfo(this, false) + "```").queue();
     }
 
-    //if it is an adminCommand, check if user is an admin
+    /**
+     * if command is an admin Command, check if user is an admin
+     */
     private boolean checkValidPermissions(MessageReceivedEvent event, List<String> argsEvent){
 
         //if default is an admin command
@@ -129,6 +134,7 @@ public abstract class CommandListener extends ListenerWrapper {
             return false;
         }
 
+        //if the length of args does not equal the modifier args
         String commandKey = argsEvent.get(1);
         if (!(args.get(commandKey).length == argsEvent.size() - 2)){
             return false;
@@ -148,6 +154,12 @@ public abstract class CommandListener extends ListenerWrapper {
 
 
     //TODO make more efficient
+
+    /**
+     * Reads strings in "" to be one input
+     * @param event
+     * @return
+     */
     public List<String> getStringsFromEvent(MessageReceivedEvent event){
         //only spaces
         //event.getMessage().getContent().toLowerCase().split(" ");

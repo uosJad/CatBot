@@ -1,7 +1,7 @@
 package src.io.catbot.commands;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import src.io.catbot.con.CatBot;
+import src.io.catbot.conn.CatBot;
 import src.io.catbot.listeners.CommandListener;
 
 import java.sql.PreparedStatement;
@@ -19,7 +19,7 @@ public class PetCommand extends CommandListener{
         setArgs("new", new String[]{"name"});
         setArgs("release", new String[]{"name"});
         setArgs("status",new String[]{});
-        setArgs("feed", new String[]{});
+        setArgs("feed", new String[]{"name"});
         addAdminCommand("new");
         addAdminCommand("release");
         addAlias("cat");
@@ -41,13 +41,17 @@ public class PetCommand extends CommandListener{
             makeNewCat(event, argsEvent);
         }
         else if (argsEvent.get(1).equals("release")){
-            makeNewCat(event, argsEvent);
+            releaseCat(event, argsEvent);
         }
         else if (argsEvent.get(1).equals("feed")){
             feedCat(event, argsEvent);
+
         }
     }
 
+    public void releaseCat(MessageReceivedEvent event, List<String> argsEvent){
+
+    }
 
     private void showStatus(MessageReceivedEvent event){
         String id = event.getGuild().getId();
@@ -173,7 +177,82 @@ public class PetCommand extends CommandListener{
 
     }
 
+
+    //TODO different hunger amounts
+    //TODO award players
     private void feedCat(MessageReceivedEvent event, List<String> argsEvent) {
+
+        String id = event.getGuild().getId();
+
+        if (argsEvent.size() != 3){
+            event.getTextChannel().sendMessage("Please select a pet").queue();
+            return;
+        }
+
+        //if pets do not exist, kick
+        try{
+            PreparedStatement sqlString = createStatement(
+                    "select count(PetName) " +
+                            "from Pets " +
+                            "where ServerID=?;");
+
+            sqlString.setString(1, id);
+
+            ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+            rs.next();
+
+            if (rs.getInt(1) < 1){
+                event.getTextChannel().sendMessage("No pets, please make a new pet").queue();
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        //check to see if pet exist and if not, print message
+        try {
+            String petName = argsEvent.get(2);
+            PreparedStatement sqlString = createStatement(
+                    "select PetName, Hunger " +
+                            "from Pets " +
+                            "where ServerID=? and " +
+                            "upper(PetName)=?;"
+            );
+
+            sqlString.setString(1, id);
+            sqlString.setString(2, petName.toUpperCase());
+            ResultSet rs = CatBot.getInstance().sendSQLStatement(sqlString);
+
+            //check if pet exists
+            if (!rs.next()){
+                event.getTextChannel().sendMessage("No pet with that name").queue();
+                rs.close();
+                return;
+            }
+
+            //if does, feed
+            PreparedStatement updateString = createStatement(
+                    "update Pets " +
+                            "set TimeLastFeed=?, " +
+                            "Hunger=? " +
+                            "where ServerID=? and " +
+                            "upper(PetName)=?"
+            );
+
+            int hunger = rs.getInt("Hunger") + 15;
+            updateString.setLong(1, System.currentTimeMillis());
+            updateString.setInt(2, hunger);
+            updateString.setString(3, id);
+            updateString.setString(4, petName.toUpperCase());
+
+            CatBot.getInstance().sendSQLUpdate(updateString);
+
+            event.getTextChannel().sendMessage(petName + " fed. Fullness increased by " + 15 + "!").queue();
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 

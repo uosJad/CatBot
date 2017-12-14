@@ -1,4 +1,4 @@
-package src.io.catbot.con;
+package src.io.catbot.conn;
 
 
 import com.google.gson.Gson;
